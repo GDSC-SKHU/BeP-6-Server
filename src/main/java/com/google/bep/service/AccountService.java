@@ -30,7 +30,7 @@ public class AccountService {
 
 
         if (!accountDTO.getPassword().equals("google") && accountRepository.findByEmail(accountDTO.getEmail()).isPresent()) {
-            throw new Exception("이미 존재하는 이메일입니다.");
+            throw new Exception();
         }
 
         // 유저 정보가 없을 경우
@@ -53,6 +53,7 @@ public class AccountService {
         // 1. ID/PW 를 기반으로 Authentication 객체 생성
         // 이때 authentication 객체는 인증 여부를 확인하는 authenticated 값이 false
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(email, password);
+
 
         // 2. 실제 검증(사용자 비밀번호 체크)이 이루어지는 부분
         // authenticate 매서드가 실행될 때 JwtUserDetailsService 에서 만든 loadUserByUsername 메서드가 실행
