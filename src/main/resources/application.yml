@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url:
-    username:
-    password:
+    url: ${DB_JDBC_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     database: mysql
@@ -19,5 +19,14 @@ spring:
     init:
       mode: always
 jwt:
-  secret:
+  secret: ${JWT_SECRET_KEY}
   token-validity-in-milliseconds: 86400000    # 토큰 만료 시간, 1000일
+
+server:
+  port: 8443
+  ssl:
+    key-store: ${KEY_STORE}
+    key-store-password: ${KEY_STORE_PASSWORD}
+    key-store-type: pkcs12
+    key-alias: tomcat
+    enabled: true
