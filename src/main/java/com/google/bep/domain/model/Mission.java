@@ -38,6 +38,7 @@ public class Mission {
 
     public ResponseMissionDTO toDTO() {
         return ResponseMissionDTO.builder()
+                .id(this.id)
                 .question(this.question)
                 .category(this.category)
                 .longitude(this.longitude)

@@ -7,6 +7,8 @@ import lombok.Data;
 @Data
 public class ResponseMissionDTO {
 
+    private Long id;
+
     private String question;
 
     private String category;
