@@ -3,7 +3,6 @@ package com.google.bep.jwt;
 import com.google.bep.domain.model.Account;
 import com.google.bep.domain.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -29,7 +28,7 @@ public class JwtUserDetailsService implements UserDetailsService {
         return account.builder()
                 .email(account.getEmail())
                 .name(account.getName())
-                .password(passwordEncoder.encode(account.getPassword()))
+                .password(account.getPassword())
                 .roles(account.getRoles())
                 .build();
     }

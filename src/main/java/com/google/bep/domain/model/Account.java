@@ -34,6 +34,9 @@ public class Account implements UserDetails {
     @Column(nullable = false)
     private int userPoint;
 
+    @Column(nullable = false)
+    private String provider;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(value = EnumType.STRING)
     private List<String> roles;

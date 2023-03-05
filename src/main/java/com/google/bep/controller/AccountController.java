@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,14 +28,23 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AccountController {
     private final AccountService accountService;
+    private final PasswordEncoder passwordEncoder;
 
-    @Operation(summary = "소셜 로그인", description = "회원이 아니면 회원가입과 동시에 JWT 토큰 발급, 회원가입이면 JWT 토큰 새로 발급")
-    @ApiResponse(responseCode = "200", description = "로그인 완료", content = @Content(schema = @Schema(implementation = TokenDTO.class)))
+    @Operation(summary = "소셜 로그인", description = "회원이 아니면 회원가입과 동시에 JWT 토큰 발급, 회원이면 JWT 토큰 새로 발급")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "로그인 성공", content = @Content(schema = @Schema(implementation = TokenDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Provider Error", content = @Content(schema = @Schema(implementation = ResponseEntity.class)))
+    })
     @PostMapping("/login/google")
-    public ResponseEntity<TokenDTO> GoogleSignupAndLogin(@RequestBody RequestAccountDTO accountDTO) throws Exception {
-        Account account = accountService.signUp(accountDTO);
-        TokenDTO authToken = accountService.login(account.getEmail(), account.getPassword());
-        return ResponseEntity.ok(authToken);
+    public ResponseEntity GoogleSignupAndLogin(@RequestBody RequestAccountDTO accountDTO) {
+        try {
+            Account account = accountService.signUp(accountDTO);
+            TokenDTO authToken = accountService.login(accountDTO.getEmail(), accountDTO.getPassword());
+            return ResponseEntity.ok(authToken);
+        } catch (Exception e) {
+            ErrorResult errorResult = new ErrorResult(409, "CONFLICT", "Provider Error");
+            return new ResponseEntity<>(errorResult, HttpStatus.CONFLICT);
+        }
     }
 
     @Operation(summary = "회원가입", description = "기본 회원가입입니다.")
@@ -59,7 +69,7 @@ public class AccountController {
     @Operation(summary = "로그인", description = "기본 로그인입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "로그인 성공", content = @Content(schema = @Schema(implementation = TokenDTO.class))),
-            @ApiResponse(responseCode = "409", description = "아이디 또는 비밀번호를 잘못 입력했습니다.", content = @Content(schema = @Schema(implementation = ResponseEntity.class)))
+            @ApiResponse(responseCode = "401", description = "아이디 또는 비밀번호를 잘못 입력했습니다.", content = @Content(schema = @Schema(implementation = ResponseEntity.class)))
     })
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody RequestLoginDTO requestLoginDTO) {

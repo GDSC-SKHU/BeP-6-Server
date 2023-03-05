@@ -18,7 +18,7 @@ public class OpenApiConfig {
     public OpenAPI openAPI() {
         Info info = new Info()
                 .title("BeP Server")
-                .version("v1.0.0")
+                .version("v1.0.1")
                 .description("BeP API 명세입니다.");
 
         // SecuritySecheme명

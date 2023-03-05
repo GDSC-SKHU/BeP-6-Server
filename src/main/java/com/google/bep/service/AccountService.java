@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,13 +24,14 @@ public class AccountService {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final TokenProvider tokenProvider;
 
+    private final PasswordEncoder passwordEncoder;
+
 
     @Transactional
     public Account signUp(RequestAccountDTO accountDTO) throws Exception {
         Account exitingAccount = accountRepository.findByEmail(accountDTO.getEmail()).orElse(null);
 
-
-        if (!accountDTO.getPassword().equals("google") && accountRepository.findByEmail(accountDTO.getEmail()).isPresent()) {
+        if (!accountDTO.getProvider().equals("google") && exitingAccount != null ) {
             throw new Exception();
         }
 
@@ -40,11 +42,13 @@ public class AccountService {
             exitingAccount = accountRepository.save(Account.builder()
                     .email(accountDTO.getEmail())
                     .name(accountDTO.getName())
-                    .password(accountDTO.getPassword())
+                    .password(passwordEncoder.encode(accountDTO.getPassword()))
                     .roles(roles)
                     .userPoint(0)
+                    .provider(accountDTO.getProvider())
                     .build());
             }
+
         return exitingAccount;
     }
 
