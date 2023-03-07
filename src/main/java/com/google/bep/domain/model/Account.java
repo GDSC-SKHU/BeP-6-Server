@@ -41,6 +41,10 @@ public class Account implements UserDetails {
     @Enumerated(value = EnumType.STRING)
     private List<String> roles;
 
+    public void updatePoint(int miPoint) {
+        this.userPoint += miPoint;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.roles.stream()

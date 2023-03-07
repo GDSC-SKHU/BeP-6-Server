@@ -2,11 +2,13 @@ package com.google.bep.service;
 
 import com.google.bep.domain.model.Account;
 import com.google.bep.domain.model.Mission;
+import com.google.bep.domain.model.UserComplete;
 import com.google.bep.domain.model.UserMission;
 import com.google.bep.domain.repository.AccountRepository;
 import com.google.bep.domain.repository.MissionRepository;
 import com.google.bep.domain.repository.UserCompleteRepository;
 import com.google.bep.domain.repository.UserMissionRepository;
+import com.google.bep.dto.ResponseDetailDTO;
 import com.google.bep.dto.ResponseMissionDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,8 +20,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MainService {
     private final AccountRepository accountRepository;
-    private final UserCompleteRepository userCompleteRepository;
+
     private final MissionRepository missionRepository;
+    private final UserCompleteRepository userCompleteRepository;
     private final UserMissionRepository userMissionRepository;
 
     public List<ResponseMissionDTO> getMissions(String email) {
@@ -56,5 +59,39 @@ public class MainService {
             }
         }
         return missions;
+    }
+
+    public ResponseDetailDTO completeMission (String email, Long missionId) {
+        Account account = accountRepository.findByEmail(email).orElse(null);    // 로그인된 유저 정보 가져옴
+        // 해당 미션id로 detailDTO 채우기
+        Mission mission = missionRepository.findById(missionId).orElse(null);
+        ResponseDetailDTO detailDTO = mission.toDetailDTO();
+
+        // user_complete에 로그인 한 유저id, 미션id 넣기
+        userCompleteRepository.save(UserComplete.builder()
+                .account(account)
+                .mission(mission)
+                .build());
+
+        // user_mission에 있는 로그인 한 유저id의 미션id는 삭제
+        userMissionRepository.deleteByAccount_IdAndMission_Id(account.getId(), missionId);
+
+        // 해당 미션의 포인트를 로그인한 유저의 유저포인트에 더함.
+        account.updatePoint(mission.getMiPoint());
+
+        Long id = userCompleteRepository.getUserCompleteById(account.getId());
+
+        // 새로 가져온 미션이 이미 유저에게 할당되었을 경우, 할당되지 않은 미션이 나올 때까지 반복
+        while (userMissionRepository.findById(id).isPresent()) {
+            id = userCompleteRepository.getUserCompleteById(account.getId());
+        }
+
+        // user_mission에 미션 1개 할당
+        userMissionRepository.save(UserMission.builder()
+                .account(account)
+                .mission(missionRepository.findById(id).orElse(null))
+                .build());
+
+        return detailDTO;
     }
 }

@@ -1,5 +1,6 @@
 package com.google.bep.controller;
 
+import com.google.bep.dto.ResponseDetailDTO;
 import com.google.bep.dto.ResponseMissionDTO;
 import com.google.bep.service.MainService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,9 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -35,5 +34,14 @@ public class MainController {
     public ResponseEntity<List<ResponseMissionDTO>> main(Authentication authentication) {
         UserDetails account = (UserDetails) authentication.getPrincipal();  // UserDetails 객체 반환
         return ResponseEntity.ok(mainService.getMissions(account.getUsername()));   // getUsername이 반환하는 email 반환
+    }
+
+    @Operation(summary = "미션 완료", description = "미션이 완료되면 해당 미션의 정보를 보내주고, 유저 포인트 적립, 미션 1개 새로 할당")
+    @ApiResponse(responseCode = "200", description = "요청 처리 완료", content = @Content(schema = @Schema(implementation = ResponseDetailDTO.class)))
+    @GetMapping("/{id}")
+    public ResponseEntity<ResponseDetailDTO> missionDetail(Authentication authentication, @PathVariable(value = "id") Long missionId) {
+        UserDetails account = (UserDetails) authentication.getPrincipal();
+        ResponseDetailDTO response = mainService.completeMission(account.getUsername(), missionId);
+        return ResponseEntity.ok(response);
     }
 }

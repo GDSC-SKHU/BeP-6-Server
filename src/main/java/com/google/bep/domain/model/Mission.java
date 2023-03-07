@@ -1,5 +1,6 @@
 package com.google.bep.domain.model;
 
+import com.google.bep.dto.ResponseDetailDTO;
 import com.google.bep.dto.ResponseMissionDTO;
 import jakarta.persistence.*;
 import lombok.*;
@@ -44,5 +45,13 @@ public class Mission {
                 .longitude(this.longitude)
                 .latitude(this.latitude)
                 .miPoint(this.miPoint).build();
+    }
+
+    public ResponseDetailDTO toDetailDTO() {
+        return ResponseDetailDTO.builder()
+                .question(this.question)
+                .category(this.category)
+                .content(this.content)
+                .imgUrl(this.imgUrl).build();
     }
 }
