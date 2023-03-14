@@ -14,8 +14,10 @@ public interface UserMissionRepository extends JpaRepository<UserMission, Long> 
     Long countByAccount_Id(Long id);
     Optional<UserMission> findById(Long id);
 
+    // repository단에서 DB를 갱신/삭제할 경우 필요한 어노테이션
     @Modifying
     @Transactional
     @Query( value = "DELETE FROM user_mission WHERE user_id = :uId AND mi_id = :miId", nativeQuery = true)
-    void deleteByAccount_IdAndMission_Id(Long uId, Long miId);
+    void deleteUserMission(Long uId, Long miId);
+
 }

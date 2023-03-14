@@ -65,6 +65,7 @@ public class AccountService {
 
         // 3. 인증된 정보를 기반으로 JWT 토큰 생성
         TokenDTO tokenDTO = tokenProvider.createToken(authentication);
+        tokenDTO.setUserPoint(accountRepository.findByEmail(email).orElse(null).getUserPoint());        // 유저포인트 세팅
         // jwt 토큰 생성
         return tokenDTO;
     }

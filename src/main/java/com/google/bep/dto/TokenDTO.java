@@ -11,6 +11,10 @@ import lombok.Data;
 public class TokenDTO {
     @Schema(description = "토큰 타입", example = "bearer")
     private String grantType;
+
     @Schema(description = "액세스 토큰")
     private String accessToken;
+
+    @Schema(description = "로그인한 유저 적립 포인트", example = "15500")
+    private int userPoint;
 }
