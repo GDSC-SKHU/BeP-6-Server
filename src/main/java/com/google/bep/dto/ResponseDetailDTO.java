@@ -18,4 +18,7 @@ public class ResponseDetailDTO {
 
     @Schema(description = "미션 웹 이미지", example = "https://c.pxhere.com/photos/fd/16/water_ocean_sea_texture_nature_blue_summer_pattern-673024.jpg!d")
     private String imgUrl;
+
+    @Schema(description = "유저 적립 포인트 갱신", example = "15800")
+    private int userPoint;
 }

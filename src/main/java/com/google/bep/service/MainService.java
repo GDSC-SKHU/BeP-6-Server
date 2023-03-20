@@ -28,26 +28,27 @@ public class MainService {
     public List<ResponseMissionDTO> getMissions(String email) {
         Account account = accountRepository.findByEmail(email).orElse(null);    // 로그인된 유저 정보 가져옴
         List<ResponseMissionDTO> missions = new ArrayList<>();
-        int cnt = userMissionRepository.countByAccount_Id(account.getId()).intValue();
-        cnt = 3-cnt;        // 할당이 필요한 미션 개수
+        int loopNum = 3;
+        int cnt = 3 - userMissionRepository.countByAccount_Id(account.getId()).intValue(); // 할당이 필요한 미션 개수
 
         // 할당받은 미션 개수가 3개가 아닐 경우 추가로 할당
         if(cnt != 0) {
             List<Long> ids = userCompleteRepository.getUserCompletesById(account.getId(), cnt);  // 미션 id 랜덤으로 가져옴
-            if(ids.isEmpty()) throw new NullPointerException("할당할 미션이 없습니다.");
+            if(ids.isEmpty()) loopNum -= cnt;
 
-            for(int i = 0; i<cnt; i++) {  // UserMission에 데이터 저장
-                userMissionRepository.save(UserMission.builder()
-                        .account(account)
-                        .mission(missionRepository.findById(ids.get(i)).orElse(null))
-                        .build());
+            else {
+                for (int i = 0; i < cnt; i++) {  // UserMission에 데이터 저장
+                    userMissionRepository.save(UserMission.builder()
+                            .account(account)
+                            .mission(missionRepository.findById(ids.get(i)).orElse(null))
+                            .build());
+                }
             }
         }
 
         // responseDTO 채워서 반환
         List<UserMission> userMissions = userMissionRepository.findByAccount_Id(account.getId());   // userMission 객체 가져옴
-
-        for(int i = 0; i<3; i++) {
+        for(int i = 0; i<loopNum; i++) {
             /* Lazy(지연로딩) -> Eager(즉시로딩)으로 바꿔야 list에 들어가짐
              Eager는 연관관계까지 즉시 함께 조회하는 반면에, Lazy는 연관관계의 데이터를 실질적으로 요구할 때 조회를 함.
              그래서 getMission을 써도 Mission의 실질적인 데이터는 가져오지 않은 상태 */
@@ -68,6 +69,7 @@ public class MainService {
 
         // 해당 미션의 포인트를 로그인한 유저의 유저포인트에 적립
         account.updatePoint(mission.getMiPoint());
+        detailDTO.setUserPoint(account.getUserPoint());
 
         // user_complete에 로그인 한 유저가 완료된 미션 저장
         userCompleteRepository.save(UserComplete.builder()

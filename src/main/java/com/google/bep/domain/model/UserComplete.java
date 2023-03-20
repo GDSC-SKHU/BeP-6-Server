@@ -1,11 +1,10 @@
 package com.google.bep.domain.model;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
@@ -23,9 +22,4 @@ public class UserComplete {
     @JoinColumn(name = "mi_id", nullable = false)
     Mission mission;
 
-    @Builder
-    public UserComplete(Account account, Mission mission) {
-        this.account = account;
-        this.mission = mission;
-    }
 }
