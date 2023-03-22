@@ -1,5 +1,6 @@
 package com.google.bep.controller;
 
+import com.google.bep.dto.DonationDTO;
 import com.google.bep.dto.ResponseDetailDTO;
 import com.google.bep.dto.ResponseMissionDTO;
 import com.google.bep.service.MainService;
@@ -44,5 +45,24 @@ public class MainController {
         UserDetails account = (UserDetails) authentication.getPrincipal();
         ResponseDetailDTO response = mainService.completeMission(account.getUsername(), missionId);
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "기부 api", description = "해당 카테고리에 로그인 유저의 포인트를 기부하는 api")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "요청 처리 완료"),
+            @ApiResponse(responseCode = "500", description = "유저의 포인트가 기부할 포인트보다 적을 경우")
+    })
+    @PostMapping("/donation")
+        public String donatePoint (Authentication authentication, @RequestBody DonationDTO donationDTO) throws Exception {
+        UserDetails account = (UserDetails) authentication.getPrincipal();
+        int userPoint = mainService.donate(account.getUsername(), donationDTO);
+        return userPoint+" 포인트 남았습니다.";
+    }
+
+    @Operation(summary = "카테고리별 기부금액 api", description = "카테고리별 기부된 총금액 LIST 출력")
+    @ApiResponse(responseCode = "200", description = "요청 처리 완료", content = @Content(schema = @Schema(implementation = DonationDTO.class)))
+    @GetMapping("/donations")
+    public ResponseEntity<List<DonationDTO>> donationList () {
+        return ResponseEntity.ok(mainService.getDonations());
     }
 }

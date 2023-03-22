@@ -1,17 +1,13 @@
 package com.google.bep.service;
 
-import com.google.bep.domain.model.Account;
-import com.google.bep.domain.model.Mission;
-import com.google.bep.domain.model.UserComplete;
-import com.google.bep.domain.model.UserMission;
-import com.google.bep.domain.repository.AccountRepository;
-import com.google.bep.domain.repository.MissionRepository;
-import com.google.bep.domain.repository.UserCompleteRepository;
-import com.google.bep.domain.repository.UserMissionRepository;
+import com.google.bep.domain.model.*;
+import com.google.bep.domain.repository.*;
+import com.google.bep.dto.DonationDTO;
 import com.google.bep.dto.ResponseDetailDTO;
 import com.google.bep.dto.ResponseMissionDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +20,9 @@ public class MainService {
     private final MissionRepository missionRepository;
     private final UserCompleteRepository userCompleteRepository;
     private final UserMissionRepository userMissionRepository;
+    private final DonationRepository donationRepository;
 
+    @Transactional
     public List<ResponseMissionDTO> getMissions(String email) {
         Account account = getAccountByEmail(email);
         List<ResponseMissionDTO> missions = new ArrayList<>();
@@ -48,8 +46,10 @@ public class MainService {
         return missions;
     }
 
+
+    @Transactional
     // UserMission에 데이터 저장
-    private void saveUserMissions(Account account, List<Long> missionIds) {
+    public void saveUserMissions(Account account, List<Long> missionIds) {
         for (Long id : missionIds) {
             Optional<Mission> mission = missionRepository.findById(id);
             mission.ifPresent(m -> {
@@ -61,21 +61,24 @@ public class MainService {
         }
     }
 
-    private List<UserMission> getUserMissions(Account account) {
+    @Transactional
+    public List<UserMission> getUserMissions(Account account) {
         return userMissionRepository.findByAccount_Id(account.getId());
     }
 
-    private Account getAccountByEmail(String email) {
+    @Transactional
+    public Account getAccountByEmail(String email) {
         return accountRepository.findByEmail(email).orElse(null);
     }
 
+    @Transactional
     public ResponseDetailDTO completeMission(String email, Long missionId) {
         Account account = getAccountByEmail(email);
         Mission mission = missionRepository.findById(missionId).orElse(null);
         ResponseDetailDTO detailDTO = mission.toDetailDTO();        // 해당 미션id로 detailDTO 채우기
 
         // 해당 미션의 포인트를 로그인한 유저의 유저포인트에 적립
-        account.updatePoint(mission.getMiPoint());
+        account.updatePoint("+",mission.getMiPoint());
         detailDTO.setUserPoint(account.getUserPoint());
 
         // user_complete에 로그인 한 유저가 완료된 미션 저장
@@ -87,5 +90,31 @@ public class MainService {
         // user_mission에 있는 로그인 한 유저id의 미션id는 삭제
         userMissionRepository.deleteUserMission(account.getId(), missionId);
         return detailDTO;
+    }
+
+    @Transactional
+    public int donate (String email, DonationDTO donationDTO) throws Exception {
+        Account account = getAccountByEmail(email);
+        if (account.getUserPoint() < donationDTO.getDonationPoint()) {
+            throw new Exception("포인트가 부족합니다.");
+        } else {
+            account.updatePoint("-", donationDTO.getDonationPoint());
+            Donation donation = donationRepository.findByCategory(donationDTO.getCategory());
+            donation.update(donationDTO.getDonationPoint());
+            donationRepository.save(donation);
+        }
+        return account.getUserPoint();
+    }
+
+    @Transactional(readOnly = true)
+    public List<DonationDTO> getDonations () {
+        List<Donation> donations = donationRepository.findAll();
+        List<DonationDTO> donationDTOList = new ArrayList<>();
+
+        for(Donation donation : donations) {    // 미션DTO 채워서 반환
+            DonationDTO donationDTO = donation.toDTO();
+            donationDTOList.add(donationDTO);
+        }
+        return donationDTOList;
     }
 }

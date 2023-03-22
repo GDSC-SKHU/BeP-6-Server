@@ -18,7 +18,7 @@ public class OpenApiConfig {
     public OpenAPI openAPI() {
         Info info = new Info()
                 .title("BeP Server")
-                .version("v1.0.2")
+                .version("v1.0.3")
                 .description("BeP API 명세입니다. servers에서 local말고 test로 선택해주세용");
 
         // SecuritySecheme명

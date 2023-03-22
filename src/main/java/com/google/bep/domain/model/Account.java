@@ -41,9 +41,11 @@ public class Account implements UserDetails {
     @Enumerated(value = EnumType.STRING)
     private List<String> roles;
 
-    public void updatePoint(int miPoint) {
-        this.userPoint += miPoint;
+    public void updatePoint(String op, int miPoint) {
+        if (op.equals("+")) this.userPoint += miPoint;
+        else if (op.equals("-")) this.userPoint -= miPoint;
     }
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
