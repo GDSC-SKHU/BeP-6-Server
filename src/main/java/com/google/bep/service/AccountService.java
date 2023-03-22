@@ -52,6 +52,7 @@ public class AccountService {
         return exitingAccount;
     }
 
+    @Transactional
     public TokenDTO login(String email, String password) {
 
         // 1. ID/PW 를 기반으로 Authentication 객체 생성
