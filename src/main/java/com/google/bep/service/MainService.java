@@ -28,14 +28,12 @@ public class MainService {
     public List<ResponseMissionDTO> getMissions(String email) {
         Account account = getAccountByEmail(email);
         List<ResponseMissionDTO> missions = new ArrayList<>();
-        int missionCnt = 3;
-        int unassignedCnt = (int) (missionCnt - userMissionRepository.countByAccount_Id(account.getId()));
+        int unassignedCnt = (int) (3 - userMissionRepository.countByAccount_Id(account.getId()));
 
         // 할당받은 미션 개수가 3개가 아닐 경우 추가로 할당
         if(unassignedCnt != 0) {
             List<Long> ids = userCompleteRepository.getUserCompletesById(account.getId(), unassignedCnt);
             if(!ids.isEmpty()) saveUserMissions(account, ids);
-            else missionCnt -= unassignedCnt;
         }
 
         /* Eager는 연관관계까지 즉시 함께 조회하는 반면에, Lazy는 연관관계의 데이터를 실질적으로 요구할 때 조회를 함.
