@@ -1,5 +1,6 @@
 package com.google.bep.dto;
 
+import com.google.bep.domain.model.Mission;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
@@ -25,4 +26,13 @@ public class ResponseMissionDTO {
     @Schema(description = "미션 포인트", example = "500")
     private int miPoint;
 
+    public static ResponseMissionDTO toDTO(Mission mission) {
+        return ResponseMissionDTO.builder()
+                .id(mission.getId())
+                .question(mission.getQuestion())
+                .category(mission.getCategory())
+                .longitude(mission.getLongitude())
+                .latitude(mission.getLatitude())
+                .miPoint(mission.getMiPoint()).build();
+    }
 }

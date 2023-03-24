@@ -1,12 +1,11 @@
 package com.google.bep.domain.model;
 
-import com.google.bep.dto.DonationDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 @Getter
 @Entity
 public class Donation {
@@ -20,15 +19,4 @@ public class Donation {
 
     @Column(nullable = false)
     private int donationPoint;
-
-    public DonationDTO toDTO() {
-        return DonationDTO.builder()
-                .category(this.category)
-                .donationPoint(this.donationPoint)
-                    .build();
-    }
-
-    public void update(int point) {
-        this.donationPoint += point;
-    }
 }

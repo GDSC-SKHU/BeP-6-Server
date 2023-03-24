@@ -11,10 +11,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
+@Getter
 @Entity
 public class Account implements UserDetails {
     @Id
@@ -40,12 +40,6 @@ public class Account implements UserDetails {
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(value = EnumType.STRING)
     private List<String> roles;
-
-    public void updatePoint(String op, int miPoint) {
-        if (op.equals("+")) this.userPoint += miPoint;
-        else if (op.equals("-")) this.userPoint -= miPoint;
-    }
-
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

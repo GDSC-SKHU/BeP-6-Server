@@ -3,9 +3,9 @@ package com.google.bep.domain.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 @Getter
 @Entity
 public class UserComplete {

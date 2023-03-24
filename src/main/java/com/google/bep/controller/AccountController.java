@@ -58,8 +58,7 @@ public class AccountController {
             accountService.signUp(accountDTO);          // 회원가입 정보 저장
             return ResponseEntity
                     .ok("회원가입 완료");           // 로그인 페이지 리다이렉트
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             ErrorResult errorResult = new ErrorResult(409, "CONFLICT", "이미 존재하는 이메일입니다.");
             return new ResponseEntity<>(errorResult, HttpStatus.CONFLICT);
         }

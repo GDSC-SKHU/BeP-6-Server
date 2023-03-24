@@ -1,10 +1,7 @@
 package com.google.bep.domain.model;
 
-import com.google.bep.dto.ResponseDetailDTO;
-import com.google.bep.dto.ResponseMissionDTO;
 import jakarta.persistence.*;
-import lombok.*;
-
+import lombok.Getter;
 
 
 @Getter
@@ -35,23 +32,4 @@ public class Mission {
 
     @Column(nullable = false)
     private String imgUrl;
-
-
-    public ResponseMissionDTO toDTO() {
-        return ResponseMissionDTO.builder()
-                .id(this.id)
-                .question(this.question)
-                .category(this.category)
-                .longitude(this.longitude)
-                .latitude(this.latitude)
-                .miPoint(this.miPoint).build();
-    }
-
-    public ResponseDetailDTO toDetailDTO() {
-        return ResponseDetailDTO.builder()
-                .question(this.question)
-                .category(this.category)
-                .content(this.content)
-                .imgUrl(this.imgUrl).build();
-    }
 }

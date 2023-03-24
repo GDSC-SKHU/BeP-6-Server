@@ -27,12 +27,12 @@ public class MainController {
 
     @Operation(summary = "퀴즈 할당", description = "main 페이지 요청시 user_mission 테이블의 데이터 개수가 3개 이하면 필요한 개수만큼 미션을 할당합니다.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "미션 응답 완료", content = @Content(schema = @Schema(implementation = ResponseMissionDTO.class))),
+            @ApiResponse(responseCode = "200", description = "미션 응답 완료", content = @Content(schema = @Schema(implementation = ResponseMissionDTO.class))),
             @ApiResponse(responseCode = "403", description = "유효하지 않은 JWT", content = @Content(schema = @Schema(implementation = ResponseEntity.class)))
     })
     // @AuthenticationPrincipal가 null인 이유는 내 코드의 TokenProvider의 getAuthentication 메서드가 DB에서 유저정보를 가져오는 것이 아님.
     @GetMapping("")
-    public ResponseEntity<List<ResponseMissionDTO>> main(Authentication authentication) throws Exception {
+    public ResponseEntity<List<ResponseMissionDTO>> main(Authentication authentication) {
         UserDetails account = (UserDetails) authentication.getPrincipal();  // UserDetails 객체 반환
         List<ResponseMissionDTO> response = mainService.getMissions(account.getUsername()); // getUsername이 반환하는 email로 로그인한 유저의 미션 불러오기
         return ResponseEntity.ok(response);
@@ -49,20 +49,20 @@ public class MainController {
 
     @Operation(summary = "기부 api", description = "해당 카테고리에 로그인 유저의 포인트를 기부하는 api")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "요청 처리 완료"),
-            @ApiResponse(responseCode = "500", description = "유저의 포인트가 기부할 포인트보다 적을 경우")
+            @ApiResponse(responseCode = "200", description = "요청 처리 완료", content = @Content(schema = @Schema(implementation = ResponseEntity.class))),
+            @ApiResponse(responseCode = "500", description = "유저의 포인트가 기부할 포인트보다 적을 경우", content = @Content(schema = @Schema(implementation = ResponseEntity.class)))
     })
-    @PostMapping("/donation")
-        public String donatePoint (Authentication authentication, @RequestBody DonationDTO donationDTO) throws Exception {
+    @PostMapping("/donations")
+    public ResponseEntity<String> donatePoint(Authentication authentication, @RequestBody DonationDTO donationDTO) throws Exception {
         UserDetails account = (UserDetails) authentication.getPrincipal();
         int userPoint = mainService.donate(account.getUsername(), donationDTO);
-        return userPoint+" 포인트 남았습니다.";
+        return ResponseEntity.ok(userPoint + " 포인트 남았습니다.");
     }
 
     @Operation(summary = "카테고리별 기부금액 api", description = "카테고리별 기부된 총금액 LIST 출력")
     @ApiResponse(responseCode = "200", description = "요청 처리 완료", content = @Content(schema = @Schema(implementation = DonationDTO.class)))
-    @GetMapping("/donations")
-    public ResponseEntity<List<DonationDTO>> donationList () {
+    @GetMapping("/donations/categories")
+    public ResponseEntity<List<DonationDTO>> donationList() {
         return ResponseEntity.ok(mainService.getDonations());
     }
 }

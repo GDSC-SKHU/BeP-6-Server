@@ -1,5 +1,6 @@
 package com.google.bep.dto;
 
+import com.google.bep.domain.model.Mission;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
@@ -21,4 +22,12 @@ public class ResponseDetailDTO {
 
     @Schema(description = "유저 적립 포인트 갱신", example = "15800")
     private int userPoint;
+
+    public static ResponseDetailDTO toDetailDTO(Mission mission) {
+        return ResponseDetailDTO.builder()
+                .question(mission.getQuestion())
+                .category(mission.getCategory())
+                .content(mission.getContent())
+                .imgUrl(mission.getImgUrl()).build();
+    }
 }

@@ -23,7 +23,6 @@ public class AccountService {
     private final AccountRepository accountRepository;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final TokenProvider tokenProvider;
-
     private final PasswordEncoder passwordEncoder;
 
 
