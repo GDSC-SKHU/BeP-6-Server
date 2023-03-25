@@ -7,6 +7,7 @@ import com.google.bep.dto.ResponseDetailDTO;
 import com.google.bep.dto.ResponseMissionDTO;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,11 +77,10 @@ public class MainService {
     @Transactional
     public ResponseDetailDTO completeMission(String email, Long missionId) {
         Account account = getAccountByEmail(email);
-        Mission mission = missionRepository.findById(missionId).orElseThrow(); // orElse null이라니!
+        Mission mission = missionRepository.findById(missionId).orElseThrow();
         ResponseDetailDTO detailDTO = ResponseDetailDTO.toDetailDTO(mission);        // 해당 미션id로 detailDTO 채우기
 
         // 해당 미션의 포인트를 로그인한 유저의 유저포인트에 적립
-//        account.updatePoint("+", mission.getMiPoint());
         updateUserPoint(account, "+", mission.getMiPoint());
         detailDTO.setUserPoint(account.getUserPoint());
 
@@ -110,7 +110,7 @@ public class MainService {
 
     @Transactional(readOnly = true)
     public List<DonationDTO> getDonations() {
-        List<Donation> donations = donationRepository.findAll();
+        List<Donation> donations = donationRepository.findAll(Sort.by(Sort.Direction.DESC, "donationPoint"));
         List<DonationDTO> donationDTOList = new ArrayList<>();
 
         for (Donation donation : donations) {    // 미션DTO 채워서 반환
