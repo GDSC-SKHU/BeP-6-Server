@@ -5,7 +5,7 @@ import com.google.bep.domain.repository.*;
 import com.google.bep.dto.DonationDTO;
 import com.google.bep.dto.ResponseDetailDTO;
 import com.google.bep.dto.ResponseMissionDTO;
-import jakarta.persistence.EntityNotFoundException;
+import com.google.bep.error.exception.RestApiException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -14,6 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static com.google.bep.error.errorcode.CommonErrorCode.INVALID_PARAMETER;
+import static com.google.bep.error.errorcode.CustomErrorCode.CATEGORY_NOT_FOUND;
+import static com.google.bep.error.errorcode.CustomErrorCode.UNASSIGNED_MISSION;
 
 @Service
 @RequiredArgsConstructor
@@ -71,13 +75,14 @@ public class MainService {
 
     @Transactional
     public Account getAccountByEmail(String email) {
-        return accountRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("존재하지 않은 사용자"));
+        return accountRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("존재하지 않은 사용자입니다."));
     }
 
     @Transactional
     public ResponseDetailDTO completeMission(String email, Long missionId) {
         Account account = getAccountByEmail(email);
-        Mission mission = missionRepository.findById(missionId).orElseThrow();
+        Mission mission = missionRepository.findById(missionId).orElseThrow(() -> new RestApiException(INVALID_PARAMETER));
+        userMissionRepository.findUserMission(account.getId(), missionId).orElseThrow(() -> new RestApiException(UNASSIGNED_MISSION));
         ResponseDetailDTO detailDTO = ResponseDetailDTO.toDetailDTO(mission);        // 해당 미션id로 detailDTO 채우기
 
         // 해당 미션의 포인트를 로그인한 유저의 유저포인트에 적립
@@ -97,10 +102,10 @@ public class MainService {
     }
 
     @Transactional
-    public int donate(String email, DonationDTO donationDTO) throws Exception {
+    public int donate(String email, DonationDTO donationDTO) {
         Account account = getAccountByEmail(email);
         if (account.getUserPoint() < donationDTO.getDonationPoint()) {
-            throw new Exception("포인트가 부족합니다.");
+            throw new IllegalArgumentException("포인트가 부족합니다.");
         } else {
             updateUserPoint(account, "-", donationDTO.getDonationPoint());
             updateDonationPoint(donationDTO.getCategory(), donationDTO.getDonationPoint());
@@ -136,7 +141,7 @@ public class MainService {
 
     @Transactional
     public void updateDonationPoint (String category, int point) {
-        Donation donation = donationRepository.findByCategory(category).orElseThrow(() -> new EntityNotFoundException("Category not found"));
+        Donation donation = donationRepository.findByCategory(category).orElseThrow(() -> new RestApiException(CATEGORY_NOT_FOUND));
         Donation updatedDonation = Donation.builder()
                                     .id(donation.getId())
                                     .category(donation.getCategory())

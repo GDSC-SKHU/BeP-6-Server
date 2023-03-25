@@ -19,4 +19,7 @@ public interface UserMissionRepository extends JpaRepository<UserMission, Long> 
     @Transactional
     @Query( value = "DELETE FROM user_mission WHERE user_id = :uId AND mi_id = :miId", nativeQuery = true)
     void deleteUserMission(Long uId, Long miId);
+
+    @Query( value = "SELECT mi_id FROM user_mission WHERE user_id = :uId AND mi_id = :miId", nativeQuery = true)
+    Optional<Long> findUserMission(Long uId, Long miId);
 }
