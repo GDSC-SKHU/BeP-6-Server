@@ -18,7 +18,7 @@ public class OpenApiConfig {
     public OpenAPI openAPI() {
         Info info = new Info()
                 .title("BeP Server")
-                .version("v1.0.4")
+                .version("v1.0.5")
                 .description("BeP API 명세입니다. servers에서 local말고 test로 선택해주세용");
 
         // SecuritySecheme명
@@ -39,7 +39,7 @@ public class OpenApiConfig {
 
         Server testServer = new Server();
         testServer.setDescription("test");
-        testServer.setUrl("https://bepserver.duckdns.org");
+        testServer.setUrl("https://bep-server-skr6jumqta-uc.a.run.app");
 
         return new OpenAPI()
                 .info(info)
