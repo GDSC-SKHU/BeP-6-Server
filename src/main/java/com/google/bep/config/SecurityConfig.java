@@ -1,7 +1,7 @@
 package com.google.bep.config;
 
-import com.google.bep.jwt.JwtFilter;
-import com.google.bep.jwt.TokenProvider;
+import com.google.bep.jwt.fliter.JwtFilter;
+import com.google.bep.jwt.token.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
