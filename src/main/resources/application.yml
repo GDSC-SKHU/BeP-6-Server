@@ -61,7 +61,8 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   hikari:
     pool-name: jpa-hikari-pool
-    maximum-pool-size: 10
+    maximum-pool-size: 5
+    max-life-timeout: 86300
     jdbc-url: ${RDS_JDBC_URL}
     username: ${RDS_DB_USER}
     password: ${RDS_DB_PASSWORD}
