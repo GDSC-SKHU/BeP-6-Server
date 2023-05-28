@@ -1,5 +1,7 @@
 package com.google.bep.jwt.token;
 
+import com.google.bep.jwt.domain.UserDetailsImpl;
+import com.google.bep.jwt.service.JwtUserDetailsService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -7,17 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -25,24 +20,32 @@ public class TokenProvider {
     private final Key key;
     private final long validityTime;
 
+    private final JwtUserDetailsService jwtUserDetailsService;
+
+    private static final String AUTHORITIES_KEY = "role";
+    private static final String EMAIL_KEY = "email";
+
     public TokenProvider(
             @Value("${jwt.secret}") String secretKey,
-            @Value("${jwt.token-validity-in-milliseconds}") long validityTime) {
+            @Value("${jwt.token-validity-in-milliseconds}") long validityTime,
+            JwtUserDetailsService jwtUserDetailsService) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
         this.validityTime = validityTime;
+        this.jwtUserDetailsService = jwtUserDetailsService;
     }
-    //token 생성
-    public TokenDTO createToken(Authentication authentication) {
-        String authorities = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(","));
 
+    //token 생성
+    public TokenDTO createToken(String email, String authorities) {
         long now = (new Date()).getTime();
         Date tokenExpiredTime = new Date(now + validityTime);
+
         String accessToken = Jwts.builder()
-                .setSubject(authentication.getName())
-                .claim("auth", authorities)
+                .setHeaderParam("typ", "JWT")
+                .setHeaderParam("alg", "HS256")
+                .setSubject("access-token")
+                .claim(EMAIL_KEY, email)
+                .claim(AUTHORITIES_KEY, authorities)
                 .setExpiration(tokenExpiredTime)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
@@ -52,22 +55,25 @@ public class TokenProvider {
                 .accessToken(accessToken)
                 .build();
     }
+
     //복호화해서 토큰에 들어있는 정보 꺼내는 메서드
-    public Authentication getAuthentication(String accessToken) {
-        Claims claims = parseClaims(accessToken);
-
-        if (claims.get("auth") == null) {
-            throw new RuntimeException("권한 정보가 없는 토큰입니다.");
+    public Claims getClaims(String token) {
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (ExpiredJwtException e) { // Access Token
+            return e.getClaims();
         }
+    }
 
-        Collection<? extends GrantedAuthority> authorities =
-                Arrays.stream(claims.get("auth").toString().split(","))
-                        .map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toList());
+    public Authentication getAuthentication(String accessToken) {
+        String email = getClaims(accessToken).get(EMAIL_KEY).toString();
 
-        //UserDetails 객체를 만들서 Authentication 리턴
-        UserDetails principal = new User(claims.getSubject(), "", authorities);
-        return new UsernamePasswordAuthenticationToken(principal, "", authorities);
+        UserDetailsImpl userDetailsImpl = jwtUserDetailsService.loadUserByUsername(email);
+        return new UsernamePasswordAuthenticationToken(userDetailsImpl, "", userDetailsImpl.getAuthorities());
     }
 
     public boolean validateToken(String token) {
@@ -84,13 +90,5 @@ public class TokenProvider {
             log.info("JWT claims string is empty.", e);
         }
         return false;
-    }
-
-    private Claims parseClaims(String accessToken) {
-        try {
-            return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken).getBody();
-        } catch (ExpiredJwtException e) {
-            return e.getClaims();
-        }
     }
 }
