@@ -14,6 +14,6 @@ public class RequestAccountDTO {
     @Schema(description = "비밀번호", example = "00000000")
     private String password;
 
-    @Schema(description = "유저 회원가입 정보 제공자", example = "google 또는 bep")
+    @Schema(description = "유저 회원가입 정보 제공자", example = "google")
     private String provider;
 }

@@ -1,7 +1,9 @@
 package com.google.bep.account.controller;
 
+import com.google.bep.account.domain.model.Account;
 import com.google.bep.account.dto.RequestAccountDTO;
 import com.google.bep.account.dto.RequestLoginDTO;
+import com.google.bep.jwt.domain.UserDetailsImpl;
 import com.google.bep.jwt.token.TokenDTO;
 import com.google.bep.error.dto.ResponseError;
 import com.google.bep.account.service.AccountService;
@@ -14,6 +16,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,10 +32,10 @@ public class AccountController {
     @Operation(summary = "소셜 로그인", description = "회원이 아니면 회원가입과 동시에 JWT 토큰 발급, 회원이면 JWT 토큰 새로 발급")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "로그인 성공", content = @Content(schema = @Schema(implementation = TokenDTO.class))),
-            @ApiResponse(responseCode = "409", description = "Provider가 구글이 아닐 경우 가입 여부 판단", content = @Content(schema = @Schema(implementation = ResponseError.class)))
+            @ApiResponse(responseCode = "400", description = "Provider가 구글이 아닐 경우 가입 여부 판단", content = @Content(schema = @Schema(implementation = ResponseError.class)))
     })
     @PostMapping("/login/google")
-    public ResponseEntity GoogleSignupAndLogin(@RequestBody RequestAccountDTO accountDTO) {
+    public ResponseEntity googleSignupAndLogin(@RequestBody RequestAccountDTO accountDTO) {
         accountService.signUp(accountDTO);
         TokenDTO authToken = accountService.login(accountDTO.getEmail(), accountDTO.getPassword());
         return ResponseEntity.ok(authToken);
@@ -57,5 +61,14 @@ public class AccountController {
     public ResponseEntity<TokenDTO> login(@RequestBody RequestLoginDTO requestLoginDTO) {
         TokenDTO authToken = accountService.login(requestLoginDTO.getEmail(), requestLoginDTO.getPassword());
         return ResponseEntity.ok(authToken);
+    }
+
+    @Operation(summary = "유저 포인트", description = "현재 유저의 포인트를 가져오는 api입니다.")
+    @ApiResponse(responseCode = "200", description = "호출 성공")
+    @GetMapping("/user-point")
+    public ResponseEntity<Integer> getUserPoint(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        Account account = userDetails.getAccount();
+        Integer userPoint = accountService.getUserPoint(account);
+        return ResponseEntity.ok(userPoint);
     }
 }

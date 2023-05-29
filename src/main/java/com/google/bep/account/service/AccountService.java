@@ -18,24 +18,24 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.google.bep.error.errorcode.CustomErrorCode.ACCOUNT_NOT_FOUND;
-import static com.google.bep.error.errorcode.CustomErrorCode.DUPLICATE_RESOURCE;
+import static com.google.bep.error.errorcode.CustomErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
 public class AccountService {
 
     private final AccountRepository accountRepository;
+
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final TokenProvider tokenProvider;
     private final PasswordEncoder passwordEncoder;
-
     private final JwtUserDetailsService jwtUserDetailsService;
 
+    public Account findByEmail(String email) {
+        return accountRepository.findByEmail(email).orElseThrow(() -> new RestApiException(ACCOUNT_NOT_FOUND));
+    }
 
     @Transactional
     public Account signUp(RequestAccountDTO accountDTO) {
@@ -46,13 +46,11 @@ public class AccountService {
         }
 
         if (!accountDTO.getProvider().equals("google") && !accountDTO.getProvider().equals("bep")) {
-            throw new IllegalArgumentException("유효하지 않은 Provider.");
+            throw new RestApiException(INVALID_PROVIDER);
         }
 
-        // 유저 정보가 없을 경우
+        // 유저 정보가 없을 경우 가입
         if (exitingAccount == null) {
-            List<String> roles = new ArrayList<>();
-            roles.add("ROLE_USER");
             exitingAccount = accountRepository.save(Account.builder()
                     .email(accountDTO.getEmail())
                     .name(accountDTO.getName())
@@ -75,7 +73,7 @@ public class AccountService {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails.getUsername(), password, userDetails.getAuthorities());
 
         // 2. 실제 검증(사용자 비밀번호 체크)이 이루어지는 부분
-        // authenticate 매서드가 실행될 때 JwtUserDetailsService 에서 만든 loadUserByUsername 메서드가 실행
+        // authenticate 매서드가 실행될 때 JwtUserDetailsService에서 만든 loadUserByUsername 메서드가 실행
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
 
         // 3. 인증된 정보를 기반으로 JWT 토큰 생성
@@ -86,14 +84,19 @@ public class AccountService {
         return tokenDTO;
     }
 
-    public Account findByEmail(String email) {
-        return accountRepository.findByEmail(email).orElseThrow(() -> new RestApiException(ACCOUNT_NOT_FOUND));
-    }
-
     // 권한 이름 가져오기
     public String getAuthorities(Authentication authentication) {
         return authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
+    }
+
+    public Integer getUserPoint(Account account) {
+        return account.getUserPoint();
+    }
+
+    public void updateUserPoint(Account account, String op, int point) {
+        account.updateUserPoint(op, point);
+        accountRepository.save(account);
     }
 }
