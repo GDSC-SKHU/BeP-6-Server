@@ -30,7 +30,7 @@ public class ResponseMissionDTO {
         return ResponseMissionDTO.builder()
                 .id(mission.getId())
                 .question(mission.getQuestion())
-                .category(mission.getCategory())
+                .category(mission.getDonation().getCategory())
                 .longitude(mission.getLongitude())
                 .latitude(mission.getLatitude())
                 .miPoint(mission.getMiPoint()).build();

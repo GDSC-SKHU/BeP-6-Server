@@ -18,8 +18,8 @@ public class OpenApiConfig {
     public OpenAPI openAPI() {
         Info info = new Info()
                 .title("BeP Server")
-                .version("v1.0.5")
-                .description("BeP API 명세입니다. servers에서 local말고 test로 선택해주세용");
+                .version("v1.0.6")
+                .description("BeP API 명세입니다. servers에서 production로 선택해야 배포된 서버 테스트 가능합니다.");
 
         // SecuritySecheme명
         String jwtSchemeName = "jwtAuth";
@@ -38,7 +38,7 @@ public class OpenApiConfig {
         localServer.setUrl("http://localhost:8080");
 
         Server testServer = new Server();
-        testServer.setDescription("test");
+        testServer.setDescription("production");
         testServer.setUrl("https://bep-server-skr6jumqta-uc.a.run.app");
 
         return new OpenAPI()
