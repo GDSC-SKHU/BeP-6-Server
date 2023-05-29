@@ -7,10 +7,12 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface UserCompleteRepository extends JpaRepository<UserComplete, Long> {
-    @Query(value="select mission.id from mission \n" +
-                            "where mission.id \n" +
-                            "not in (select user_complete.mi_id from user_complete where user_complete.user_id = :id \n" +
-                            "UNION SELECT user_mission.mi_id FROM user_mission WHERE user_mission.user_id = :id) \n" +
-                            "order by RAND() limit :cnt", nativeQuery=true)
+    @Query(value = "SELECT mission.id " +
+            "FROM mission " +
+            "LEFT JOIN user_complete ON mission.id = user_complete.mi_id AND user_complete.user_id = :id " +
+            "LEFT JOIN user_mission ON mission.id = user_mission.mi_id AND user_mission.user_id = :id " +
+            "WHERE user_complete.mi_id IS NULL AND user_mission.mi_id IS NULL " +
+            "ORDER BY RAND() " +
+            "LIMIT :cnt", nativeQuery = true)
     List<Long> getUserCompletesById(Long id, int cnt);
 }
