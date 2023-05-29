@@ -1,5 +1,6 @@
 package com.google.bep.mission.domain.model;
 
+import com.google.bep.donation.domain.model.Donation;
 import jakarta.persistence.*;
 import lombok.Getter;
 
@@ -16,9 +17,6 @@ public class Mission {
     private String question;
 
     @Column(nullable = false)
-    private String category;
-
-    @Column(nullable = false)
     private String latitude;
 
     @Column(nullable = false)
@@ -32,4 +30,8 @@ public class Mission {
 
     @Column(nullable = false)
     private String imgUrl;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "donation_id", nullable = false)
+    Donation donation;
 }

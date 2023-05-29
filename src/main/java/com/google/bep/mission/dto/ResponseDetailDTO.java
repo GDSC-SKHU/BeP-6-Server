@@ -11,6 +11,9 @@ public class ResponseDetailDTO {
     @Schema(description = "미션 질문", example = "프랑스의 위치는 어디인가요?")
     private String question;
 
+    @Schema(description = "기부 카테고리 id", example = "1")
+    private Long donationId;
+
     @Schema(description = "카테고리", example = "LIFE BELOW WATER")
     private String category;
 
@@ -26,7 +29,8 @@ public class ResponseDetailDTO {
     public static ResponseDetailDTO toDetailDTO(Mission mission) {
         return ResponseDetailDTO.builder()
                 .question(mission.getQuestion())
-                .category(mission.getCategory())
+                .donationId(mission.getDonation().getId())
+                .category(mission.getDonation().getCategory())
                 .content(mission.getContent())
                 .imgUrl(mission.getImgUrl()).build();
     }
