@@ -41,8 +41,8 @@ public class MissionController {
     @Operation(summary = "미션 완료", description = "미션이 완료되면 해당 미션의 정보를 보내주고, 유저 포인트를 적립합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "요청 처리 완료", content = @Content(schema = @Schema(implementation = ResponseDetailDTO.class))),
-            @ApiResponse(responseCode = "404", description = "유저가 할당받은 미션이 아닙니다.", content = @Content(schema = @Schema(implementation = ResponseError.class))),
-            @ApiResponse(responseCode = "400", description = "잘못된 미션 id", content = @Content(schema = @Schema(implementation = ResponseError.class)))
+            @ApiResponse(responseCode = "400", description = "잘못된 미션 id 요청", content = @Content(schema = @Schema(implementation = ResponseError.class))),
+            @ApiResponse(responseCode = "404", description = "유저가 할당받은 미션이 아닙니다.", content = @Content(schema = @Schema(implementation = ResponseError.class)))
     })
     @GetMapping("/{missionId}")
     public ResponseEntity<ResponseDetailDTO> missionDetail(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable(value = "missionId") Long missionId) {

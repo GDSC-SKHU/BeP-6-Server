@@ -28,7 +28,8 @@ public class DonationController {
     @Operation(summary = "기부 api", description = "해당 카테고리에 로그인 유저의 포인트를 기부하는 api")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "갱신된 유저 포인트 Integer 타입으로 반환", content = @Content),
-            @ApiResponse(responseCode = "400", description = "옳지 않은 기부포인트를 선택했을 경우", content = @Content(schema = @Schema(implementation = ResponseError.class)))
+            @ApiResponse(responseCode = "400", description = "옳지 않은 기부포인트를 선택했을 경우", content = @Content(schema = @Schema(implementation = ResponseError.class))),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 기부 카테고리 id", content = @Content(schema = @Schema(implementation = ResponseError.class)))
     })
     @PostMapping("/donations/{donationId}")
     public ResponseEntity<Integer> donateUserPoint(@AuthenticationPrincipal UserDetailsImpl userDetails,

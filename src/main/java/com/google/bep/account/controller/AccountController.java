@@ -30,10 +30,7 @@ public class AccountController {
     private final AccountService accountService;
 
     @Operation(summary = "소셜 로그인", description = "회원이 아니면 회원가입과 동시에 JWT 토큰 발급, 회원이면 JWT 토큰 새로 발급")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "로그인 성공", content = @Content(schema = @Schema(implementation = TokenDTO.class))),
-            @ApiResponse(responseCode = "400", description = "Provider가 구글이 아닐 경우 가입 여부 판단", content = @Content(schema = @Schema(implementation = ResponseError.class)))
-    })
+    @ApiResponse(responseCode = "200", description = "로그인 성공", content = @Content(schema = @Schema(implementation = TokenDTO.class)))
     @PostMapping("/login/google")
     public ResponseEntity googleSignupAndLogin(@RequestBody RequestAccountDTO accountDTO) {
         accountService.signUp(accountDTO);
@@ -44,6 +41,7 @@ public class AccountController {
     @Operation(summary = "회원가입", description = "기본 회원가입입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "회원가입 완료", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Provider가 google 혹은 bep가 아닐 경우", content = @Content(schema = @Schema(implementation = ResponseError.class))),
             @ApiResponse(responseCode = "409", description = "이미 존재하는 이메일입니다.", content = @Content(schema = @Schema(implementation = ResponseError.class)))
     })
     @PostMapping("/signup")
