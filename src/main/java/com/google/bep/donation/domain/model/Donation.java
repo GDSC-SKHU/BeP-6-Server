@@ -19,4 +19,8 @@ public class Donation {
 
     @Column(nullable = false)
     private int donationPoint;
+
+    public void updateDonationPoint(int point) {
+        this.donationPoint += point;
+    }
 }
