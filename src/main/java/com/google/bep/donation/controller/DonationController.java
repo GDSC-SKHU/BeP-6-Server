@@ -3,6 +3,7 @@ package com.google.bep.donation.controller;
 import com.google.bep.account.domain.model.Account;
 import com.google.bep.donation.Service.DonationService;
 import com.google.bep.donation.domain.model.Donation;
+import com.google.bep.donation.dto.RequestDonationDTO;
 import com.google.bep.error.dto.ResponseError;
 import com.google.bep.jwt.domain.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,9 +35,9 @@ public class DonationController {
     @PostMapping("/donations/{donationId}")
     public ResponseEntity<Integer> donateUserPoint(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                @PathVariable(value = "donationId") Long donationId,
-                                               @RequestBody int donationPoint) {
+                                               @RequestBody RequestDonationDTO donationDTO) {
         Account account = userDetails.getAccount();
-        int userPoint = donationService.donate(account, donationPoint, donationId);
+        int userPoint = donationService.donate(account, donationDTO, donationId);
         return ResponseEntity.ok(userPoint);
     }
 

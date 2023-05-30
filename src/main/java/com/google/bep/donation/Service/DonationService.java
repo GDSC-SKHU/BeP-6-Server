@@ -4,6 +4,7 @@ import com.google.bep.account.domain.model.Account;
 import com.google.bep.account.service.AccountService;
 import com.google.bep.donation.domain.model.Donation;
 import com.google.bep.donation.domain.repository.DonationRepository;
+import com.google.bep.donation.dto.RequestDonationDTO;
 import com.google.bep.error.exception.RestApiException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -24,14 +25,14 @@ public class DonationService {
     private final AccountService accountService;
 
     @Transactional
-    public int donate(Account account, int donationPoint, Long donationId) {
-        if (account.getUserPoint() < donationPoint) {
+    public int donate(Account account, RequestDonationDTO donationDTO, Long donationId) {
+        if (account.getUserPoint() < donationDTO.getDonationPoint()) {
             throw new RestApiException(INVALID_DONATION_POINT);
-        } else if (0 < donationPoint) {
-            accountService.updateUserPoint(account, "-",donationPoint);
+        } else if (0 < donationDTO.getDonationPoint()) {
+            accountService.updateUserPoint(account, "-", donationDTO.getDonationPoint());
 
             Donation donation = findById(donationId);
-            donation.updateDonationPoint(donationPoint);
+            donation.updateDonationPoint(donationDTO.getDonationPoint());
             donationRepository.save(donation);
 
         } else throw new RestApiException(INVALID_PARAMETER);
